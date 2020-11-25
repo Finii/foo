@@ -1,14 +1,13 @@
 More or less simple setup to reproduce Meson build-rpath difficulty.
 
 This will install some files to `/tmp/special/dir`.
-You need to set `PKG_CONFIG_PATH=/tmp/special/dir/pkgconfig`.
 
 Steps:
 
 1. `meson build`
 2. `ninja -C build install`
 3. Set `preparation` to `false` in main `meson.build` file.
-4. Start from scratch: `rm -Rf build && meson build`
+4. Start from scratch: `rm -Rf build && meson --pkg-config-path=/tmp/special/dir/pkgconfig build`
 5. `ninja -C build`
 6. `ldd build/tests/mytest`
 7. `readelf -d build/tests/mytest`
@@ -21,6 +20,8 @@ their pkgconfig files.
 Step 3 removes the preliminary steps in Meson to install `libbar`. The preparation is finished
 and we have two libraries installed in the special directory. Now this setup will only work
 on `foo` and use the previously installed `bar`.
+
+Step 4 uses the previously installed pkgconfig files and libs in the special directory.
 
 Step 5 builds a new `foo`, that we want to test. We do not know anything about `bar` anymore and
 want to fetch it as dependency. When we run the test executable, instead of using
